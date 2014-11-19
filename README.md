@@ -15,7 +15,7 @@ Add this to your project dependencies:
 
 ## Usage
 
-Make sure you have the jQuery and Boostrap javascript loaded in your page:
+Make sure you have the jQuery javascript loaded in your page:
 ```html
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 ```
