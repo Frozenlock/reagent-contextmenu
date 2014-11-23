@@ -1,8 +1,10 @@
 # reagent-contextmenu
 
-Bootstrap context menu components for Reagent.
+Context menu components for Reagent.
 
-Takes care of all the little details for creating a context menu with Bootstrap.
+Takes care of all the little details for creating a context menu.
+
+(Compatible with Bootstrap; already uses `UL` and `LI` elements along with the `dropdown` class.)
 
 <img src="https://raw.githubusercontent.com/Frozenlock/reagent-contextmenu/master/contextmenu-example.png"
  alt="Context menu demo" title="Context menu demo"/>
@@ -14,12 +16,6 @@ Add this to your project dependencies:
 
 
 ## Usage
-
-Make sure you have the jQuery javascript loaded in your page:
-```html
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-```
-
 
 Include the `context-menu` component in the root of your document:
 
@@ -44,3 +40,5 @@ Note that the *name* can be any Reagent component.
 	                               :divider
 	                               ["my-other-fn" (fn [] (prn (str 1 2 3)))]])
 ```
+
+You can style your context menu with CSS and the class `context-menu`.
