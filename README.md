@@ -27,7 +27,7 @@ Include the `context-menu` component in the root of your document:
 	  [menu/context-menu]]) ;  <-------
 ```
 
-Everytime you want to show a context-menu to the user, you just need to call `context` by passing it the `:on-context-menu` event and the name-functions collection.
+Everytime you want to show a context-menu to the user, you just need to call `context!` by passing it the `:on-context-menu` event and the name-functions collection.
 
 Name-functions pairs should be of the following form: [name fn].
 If you replace the name-fn by a keyword, it will place a divider.
