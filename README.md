@@ -36,9 +36,9 @@ Note that the *name* can be any Reagent component.
 
 
 ```clj
-:on-context-menu #(menu/context % [[ [:span "my-fn"] (fn [] (+ 1 2))] ; <---- the name is a span
-	                               :divider
-	                               ["my-other-fn" (fn [] (prn (str 1 2 3)))]])
+:on-context-menu #(menu/context! % [[ [:span "my-fn"] (fn [] (+ 1 2))] ; <---- the name is a span
+	                                :divider
+	                                ["my-other-fn" (fn [] (prn (str 1 2 3)))]])
 ```
 
 You can style your context menu with CSS and the class `context-menu`.
