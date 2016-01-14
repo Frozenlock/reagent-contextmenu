@@ -1,4 +1,4 @@
-(defproject org.clojars.frozenlock/reagent-contextmenu "0.2.0"
+(defproject org.clojars.frozenlock/reagent-contextmenu "0.2.1"
   :description "Bootstrap context menu for Reagent!"
   :url "http://example.com/FIXME"
 

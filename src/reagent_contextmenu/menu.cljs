@@ -46,7 +46,8 @@
      {:id context-id :role "menu"
       :style {:display (get !c-atom :display "none")
               :left (:left !c-atom)
-              :top (:top !c-atom)}}
+              :top (:top !c-atom)
+              :position "fixed"}}
      (when-let [actions (:actions !c-atom)]
        (for [item actions]
          (if (coll? item)
@@ -70,5 +71,11 @@
    :divider
    [my-other-fn #(prn (str 1 2 3))]]"
   [evt name-fn-coll]
-  (show-context! name-fn-coll (.-pageX evt) (.-pageY evt))
+  (show-context! name-fn-coll 
+                 (- (.-pageX evt) ;; absolute position
+                    (- (.-pageX evt) ;; scrolled
+                       (.-clientX evt)))
+                 (- (.-pageY evt) ;; absolute position
+                    (- (.-pageY evt) ;; scrolled
+                       (.-clientY evt))))
   (.preventDefault evt))
