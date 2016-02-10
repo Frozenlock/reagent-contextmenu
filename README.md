@@ -4,7 +4,7 @@ Context menu components for Reagent.
 
 Takes care of all the little details for creating a context menu.
 
-(Compatible with Bootstrap; already uses `UL` and `LI` elements along with the `dropdown` class.)
+(Compatible with Bootstrap; already uses `UL` and `LI` elements along with the `dropdown-menu` class.)
 
 <img src="https://raw.githubusercontent.com/Frozenlock/reagent-contextmenu/master/contextmenu-example.png"
  alt="Context menu demo" title="Context menu demo"/>
@@ -30,13 +30,19 @@ Include the `context-menu` component in the root of your document:
 Everytime you want to show a context-menu to the user, you just need to call `context!` by passing it the `:on-context-menu` event and the name-functions collection.
 
 Name-functions pairs should be of the following form: [name fn].
+If `fn` is nil, it the menu will mark this item with the `disabled` class.
+
 If you replace the name-fn by a keyword, it will place a divider.
+
+Finally, you if replace the name-fn by a string, it will be considered a
+section heading.
 
 Note that the *name* can be any Reagent component.
 
 
 ```clj
-:on-context-menu #(menu/context! % [[ [:span "my-fn"] (fn [] (+ 1 2))] ; <---- the name is a span
+:on-context-menu #(menu/context! % ["Some title"
+                                    [ [:span "my-fn"] (fn [] (+ 1 2))] ; <---- the name is a span
 	                                :divider
 	                                ["my-other-fn" (fn [] (prn (str 1 2 3)))]])
 ```

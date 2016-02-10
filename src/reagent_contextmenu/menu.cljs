@@ -47,15 +47,24 @@
       :style {:display (get !c-atom :display "none")
               :left (:left !c-atom)
               :top (:top !c-atom)
-              :position "fixed"}}
+              :position "fixed"}
+      :on-context-menu #(.preventDefault %)}
      (when-let [actions (:actions !c-atom)]
-       (for [item actions]
-         (if (coll? item)
-           (let [[name func] item]
-             ^{:key name}
-             [:li [:a {:on-click #(do (hide-context!) (func %))
-                       :style {:cursor "pointer"}} name]])
-           ^{:key (str item)}[:li.divider])))]))
+       (for [[id item] (map-indexed vector actions)]
+         (cond 
+           (coll? item) (let [[name func] item]
+                          ^{:key id}
+                          [:li (when-not func {:class "disabled"}) 
+                           [:a {:on-click (when func #(do (hide-context!) (func %)))
+                                :style (when func {:cursor "pointer"})
+                                :on-context-menu #(.preventDefault %)} name]])
+           (keyword? item)
+           ^{:key id}[:li.divider]
+           
+           :else 
+           ^{:key id}[:li.dropdown-header 
+                      {:on-context-menu #(.preventDefault %)}
+                      item])))]))
 
 
 
@@ -65,9 +74,16 @@
 
 (defn context!
   "Update the context menu with a collection of [name function] pairs.
-   When passed a keyword instead of [name function], a divider is inserted.
+  When function is nil, consider the button as 'disabled' and do not
+  allow any click.  
 
-  [[my-fn #(+ 1 2)]
+  When passed a keyword instead of [name function], a divider is
+  inserted.
+
+  If a string is passed, convert it into a header.
+
+  [\"Menu header\"
+   [my-fn #(+ 1 2)]
    :divider
    [my-other-fn #(prn (str 1 2 3))]]"
   [evt name-fn-coll]
