@@ -28,7 +28,7 @@
 
 ;;;; container to be included into the document
 
-(declare action-or-submenu)
+(declare actions-to-components)
 
 (defn submenu-component [name actions-coll hide-context!]
   (let [show? (r/atom nil)]
