@@ -14,6 +14,8 @@ Add this to your project dependencies:
 
 [![Clojars Project](http://clojars.org/org.clojars.frozenlock/reagent-contextmenu/latest-version.svg)](http://clojars.org/org.clojars.frozenlock/reagent-contextmenu)
 
+The Bootstrap CSS is recommended if you don't want to style the menu
+yourself, along with `contextmenu.css` (especially for submenus).
 
 ## Usage
 
@@ -41,10 +43,21 @@ Note that the *name* can be any Reagent component.
 
 
 ```clj
-:on-context-menu #(menu/context! % ["Some title"
-                                    [ [:span "my-fn"] (fn [] (+ 1 2))] ; <---- the name is a span
-	                                :divider
-	                                ["my-other-fn" (fn [] (prn (str 1 2 3)))]])
+[:div {:on-context-menu
+       (fn [evt]
+         (menu/context! 
+          evt
+          ["Some title"             ; <---- string is a section title
+           ["my-fn" #(prn "my-fn")]
+           [[:span "my-other-fn"] #(prn "my-other-fn")] ; <---- the name is a span
+           :divider                    ; <--- keyword is a divider
+           [[:span 
+             [:span.cmd "Copy"] 
+             [:span.kbd.text-muted "ctrl-c"]] ; <--- some classes to show a keyboard shortcut
+            #(prn "Copy")]
+           ["Submenu" 
+            ["Submenu title" ["Submenu item 1" #(prn "Item 1")]]]] ; <-- submenus are simply nested menus.
+          ))}]
 ```
 
 You can style your context menu with CSS and the class `context-menu`.
