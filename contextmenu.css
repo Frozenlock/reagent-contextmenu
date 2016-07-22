@@ -1,0 +1,71 @@
+/* Context menu */
+
+.context-menu > li > a {
+    position: relative;
+    padding-right: 70px;
+}
+
+.context-menu > li > a:active{
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.3), inset 0 -1px 2px rgba(0,0,0,.2);
+    padding-top: 4px;
+    margin-bottom: -1px;
+    }
+    
+
+.context-menu > li > a span.cmd {
+    padding-right: 65px;
+}
+
+
+.context-menu > li > a span.kbd {
+    position: absolute;
+    right: 20px;
+    top: 3px;
+}
+
+.context-menu > li > a:active span.kbd {
+    top: 4px;
+}
+
+
+/* Context-menu submenu */
+
+.context-submenu {
+    position:relative;
+}
+.context-submenu>.context-menu {
+    top:0;
+    left:100%;
+    margin-top:-6px;
+    margin-left:-1px;
+    border-radius:0 6px 6px 6px;
+}
+.context-submenu:hover>.context-menu {
+    display:block;
+}
+.context-submenu>a:after {
+    display:block;
+    content:" ";
+    float:right;
+    width:0;
+    height:0;
+    border-color:transparent;
+    border-style:solid;
+    border-width:5px 0 5px 5px;
+    border-left-color:#cccccc;
+    margin-top:5px;
+    margin-right:-10px;
+}
+.context-submenu:hover>a:after {
+    border-left-color:#ffffff;
+}
+.context-submenu.pull-left {
+    float:none;
+}
+.context-submenu.pull-left>.context-menu {
+    left:-100%;
+    margin-left:10px;
+    border-radius:6px 0 6px 6px;
+}
+
+
