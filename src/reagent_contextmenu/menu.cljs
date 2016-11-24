@@ -8,69 +8,76 @@
 ;;; Recommended: at the start of the document.
 
 
-(def default-menu-atom (r/atom {:actions [["Action" #(prn "hello")]]
-                                :left 0
-                                :top 0
-                                :display nil}))
+
+(defonce default-menu-atom (r/atom {:actions [["Action" #(prn "hello")]]
+                                    :left 0
+                                    :top 0
+                                    :display nil}))
 
 
-(defn show-context! [menu-atom actions x y]
+(defn- show-context! [menu-atom actions x y]
   (swap! menu-atom assoc
          :actions actions
          :left (- x 10)  ;; we want the menu to appear slightly under the mouse
          :top (- y 10)
          :display "block"))
 
-(defn hide-context! [menu-atom]
+(defn- hide-context! [menu-atom]
   (swap! menu-atom assoc :display nil))
-
 
 
 ;;;; container to be included into the document
 
 (declare actions-to-components)
 
-(defn submenu-component [name actions-coll hide-context!]
-  (let [show? (r/atom nil)]
+(defn- submenu-component [showing-submenus-atom id name actions-coll hide-context!]
+  (let [show? (r/cursor showing-submenus-atom [id])
+        s-menus-a (r/cursor showing-submenus-atom [:sub id])]
     (fn []
-      [:li {:class "context-submenu"
-            :on-mouse-leave #(reset! show? nil)}
+      [:li {:class "context-submenu"}
        [:a {:style {:cursor "pointer"}
-            :on-mouse-over #(reset! show? true)
+            :class (when @show? "selected")
+            :on-mouse-over #(reset! showing-submenus-atom {id true})
             :on-click #(do (.stopPropagation %)
-                           (swap! show? not))} 
+                           (swap! show? not))}
         name]
        [:ul.dropdown-menu.context-menu
         {:style {:display (if @show? :block :none)}}
-        (actions-to-components actions-coll hide-context!)]])))
+        (actions-to-components actions-coll s-menus-a hide-context!)]])))
 
-(defn action-component [name action-fn hide-context!]
-  [:li
-   [:a {:on-click #(do (.stopPropagation %)
-                       (hide-context!) 
-                       (action-fn %))
-        :style {:cursor :pointer}} name]])
+(defn- action-component [name action-fn hide-context!]
+  [:a {:on-click #(do (.stopPropagation %)
+                      (hide-context!) 
+                      (action-fn %))
+       :style {:cursor :pointer}} name])
 
-(defn action-or-submenu [item hide-context!]
+(defn- action-or-submenu [[id item] showing-submenus-atom hide-context!]
   (let [[name fn-or-sub] item
-        submenu (when (coll? fn-or-sub) fn-or-sub)]
-    (cond submenu [submenu-component name submenu hide-context!]
-          fn-or-sub [action-component name fn-or-sub hide-context!]
-          :else [:li {:class :disabled}
+        submenu (when (coll? fn-or-sub) fn-or-sub)
+        clear-sub-menus! #(reset! showing-submenus-atom nil)]
+    (cond submenu [submenu-component showing-submenus-atom id name submenu hide-context!]
+          fn-or-sub [:li {:on-mouse-enter clear-sub-menus!}
+                     [action-component name fn-or-sub hide-context!]]
+          :else [:li {:class :disabled
+                      :on-mouse-enter clear-sub-menus!}
                  [:a name]])))
 
 
-(defn actions-to-components [actions-coll hide-context!]
+(defn- actions-to-components [actions-coll showing-submenus-atom hide-context!]
   (for [[id item] (map-indexed vector actions-coll)]
-    (cond 
-      (coll? item) ^{:key id} [action-or-submenu item hide-context!]
-      (keyword? item)
-      ^{:key id}[:li.divider]
-      
-      :else 
-      ^{:key id}[:li.dropdown-header 
-                 {:style {:cursor :default}}
-                 item])))
+    (let [clear-sub-menus! #(reset! showing-submenus-atom nil)]
+      (cond 
+        (coll? item) ^{:key id} [action-or-submenu [id item] showing-submenus-atom hide-context!]
+        (keyword? item)
+        ^{:key id}[:li.divider {:on-mouse-enter clear-sub-menus!}]
+        
+        :else 
+        ^{:key id}[:li.dropdown-header 
+                   {:style {:cursor :default}
+                    :on-mouse-enter clear-sub-menus!}
+                   item]))))
+
+;; main component for the user
 
 (defn context-menu
   "The context menu component. Will use a default (and global) state
@@ -80,23 +87,28 @@
    ;; remove the context menu if we click out of it or press `esc' (like the normal context menu)  
    (r/with-let [hide-context! #(hide-context! menu-atom)
                 esc-handler! (fn [evt] (when (= (.-keyCode evt) 27) ;; `esc' key
+                                         (.stopPropagation evt)
                                          (hide-context!)))
+                scroll! (fn [evt]
+                          (let [dy (.-deltaY evt)]
+                            (swap! menu-atom update-in [:top] #(- % dy))))
                 click-outside-handler! hide-context!
                 _ (events/listen js/window EventType.KEYUP esc-handler!)
                 _ (events/listen js/window EventType.CLICK click-outside-handler!)]
      (let [!m-atom @menu-atom
-           display (get !m-atom :display)]
+           display (get !m-atom :display)
+           showing-submenus-atom (r/atom {})]
        [:ul.dropdown-menu.context-menu
         {;:id context-id 
          :role "menu"
+         :on-wheel scroll!
          :style {:display (or display "none")
                  :left (:left !m-atom)
-                 :top (:top !m-atom)
-                 :position "fixed"}
-         :on-context-menu #(.preventDefault %)}
+                 :top (:top !m-atom)}
+         :on-context-menu #(.preventDefault %)}        
         (when display
           (when-let [actions (:actions !m-atom)]           
-            (actions-to-components actions hide-context!)))])
+            (actions-to-components actions showing-submenus-atom hide-context!)))])
      (finally (events/unlisten js/window EventType.CLICK click-outside-handler!)
               (events/unlisten js/window EventType.KEYUP esc-handler!)))))
 
