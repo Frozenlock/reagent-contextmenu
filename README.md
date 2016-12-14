@@ -29,10 +29,10 @@ Include the `context-menu` component in the root of your document:
 	  [menu/context-menu]]) ;  <-------
 ```
 
-Everytime you want to show a context-menu to the user, you just need to call `context!` by passing it the `:on-context-menu` event and the name-functions collection.
+Everytime you want to show a context-menu to the user, you just need to call `context!` by passing it the `:on-context-menu` event and the name-function collection.
 
-Name-functions pairs should be of the following form: [name fn].
-If `fn` is nil, it the menu will mark this item with the `disabled` class.
+Name-function pairs should be of the following form: [name fn].
+If `fn` is nil, the menu will mark this item with the `disabled` class.
 
 If you replace the name-fn by a keyword, it will place a divider.
 
@@ -56,8 +56,11 @@ Note that the *name* can be any Reagent component.
              [:span.kbd.text-muted "ctrl-c"]] ; <--- some classes to show a keyboard shortcut
             #(prn "Copy")]
            ["Submenu" 
-            ["Submenu title" ["Submenu item 1" #(prn "Item 1")]]]] ; <-- submenus are simply nested menus.
-          ))}]
+            ["Submenu title" ["Submenu item 1" #(prn "Item 1")]]]]))}] ; <-- submenus are simply nested menus.
 ```
 
 You can style your context menu with CSS and the class `context-menu`.
+
+Pressing `Esc` or clicking outside the context-menu will hide it.
+
+The backdrop, which is transparent by default, can be styled using the class `context-menu-backdrop`.
