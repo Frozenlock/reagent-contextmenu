@@ -123,7 +123,6 @@
           [:ul.dropdown-menu.context-menu
            {:ref (fn [this]
                    (reset! dom-node this))
-            :tab-index -1
             :role "menu"
             :on-wheel scroll!
             :style {:display (or display "none")
