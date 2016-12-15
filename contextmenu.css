@@ -6,7 +6,12 @@
 
 .dropdown-menu.context-menu {
     transition: top .2s linear, left .2s linear, margin-top .2s linear, margin-left .2s linear;
-    }
+}
+
+.dropdown-menu.context-menu:focus {
+    outline: none;
+}
+
 
 .context-menu > li > a {
     position: relative;
