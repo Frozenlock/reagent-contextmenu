@@ -4,9 +4,14 @@
     background: rgba(0,0,0,0);
 }
 
-.dropdown-menu.context-menu {
-    transition: top .2s linear, left .2s linear, margin-top .2s linear, margin-left .2s linear;
+.context-menu-container {
+    transition: top .2s linear, left .2s linear;
 }
+
+.dropdown-menu.context-menu {
+    transition: margin-top .2s linear, margin-left .2s linear;
+}
+
 
 .dropdown-menu.context-menu:focus {
     outline: none;
@@ -47,9 +52,6 @@
 
 /* Context-menu submenu */
 
-.context-submenu {
-    position:relative;
-}
 .context-submenu>.context-menu {
     top:0;
     left:100%;

@@ -117,30 +117,31 @@
       :reagent-render
       (fn []
         (let [{:keys [display actions left top]} @menu-atom
+              esc-handler! (fn [evt]
+                             (when (= (.-keyCode evt) 27) ;; `esc' key
+                               (.stopPropagation evt)
+                               (hide-context!)))
               scroll! (fn [evt]
                         (let [dy (.-deltaY evt)]
                           (swap! menu-atom update-in [:top] #(- % dy))))]
-          [:ul.dropdown-menu.context-menu
-           {:ref (fn [this]
-                   (reset! dom-node this))
-            :role "menu"
-            :on-wheel scroll!
-            :style {:display (or display "none")
+          [:div.context-menu-container
+           {:style {:position :fixed
                     :left left
                     :top top}}
-           (when display
-             (when actions
-               (actions-to-components actions showing-submenus-atom hide-context!)))]))})))
-
-
-(defn- backdrop [hide-context!]
-  [:div.context-menu-backdrop
-   {:style {:position :fixed
-            :width "100vw"
-            :height "100vh"
-            :top 0
-            :left 0}
-    :on-click hide-context!}])
+           [:ul.dropdown-menu.context-menu
+            {:ref (fn [this]
+                    (reset! dom-node this)
+                    (when this
+                      (.focus this)))
+             :on-key-up esc-handler!
+             :tab-index -1
+             :role "menu"
+             :on-wheel scroll!
+             :style {:display (or display "none")
+                     :position :relative}}
+            (when display
+              (when actions
+                (actions-to-components actions showing-submenus-atom hide-context!)))]]))})))
 
 
 ;; main component for the user
@@ -153,19 +154,20 @@
   ([menu-atom]
    ;; remove the context menu if we click out of it or press `esc' (like the normal context menu)  
    (let [hide-context! #(hide-context! menu-atom)
-         esc-handler! (fn [evt] (when (= (.-keyCode evt) 27) ;; `esc' key
-                                  (.stopPropagation evt)
-                                  (hide-context!)))
          display (get @menu-atom :display)]
-     [:div {:on-context-menu (fn [e]
-                               (hide-context!)
-                               (.preventDefault e))
-            :on-key-up esc-handler!
-            :tab-index -1
-            :ref #(some-> % (.focus))}
-      (when display [backdrop hide-context!])
+     [:div
       (when display
-        [inner-context-menu menu-atom hide-context!])])))
+        [:div.context-menu-backdrop
+         {:on-context-menu (fn [e]
+                             (hide-context!)
+                             (.preventDefault e))
+          :on-click hide-context!
+          :style {:position :fixed
+                  :top 0
+                  :left 0
+                  :width "100vw"
+                  :height "100vh"}}
+         [inner-context-menu menu-atom hide-context!]])])))
 
 
 
@@ -190,10 +192,6 @@
   ([evt name-fn-coll] (context! evt default-menu-atom name-fn-coll))
   ([evt menu-atom name-fn-coll]
    (show-context! menu-atom name-fn-coll 
-                  (- (.-pageX evt) ;; absolute position
-                     (- (.-pageX evt) ;; scrolled
-                        (.-clientX evt)))
-                  (- (.-pageY evt) ;; absolute position
-                     (- (.-pageY evt) ;; scrolled
-                        (.-clientY evt))))
+                  (.-clientX evt)
+                  (.-clientY evt))
    (.preventDefault evt)))
