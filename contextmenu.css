@@ -52,6 +52,10 @@
 
 /* Context-menu submenu */
 
+.context-submenu {
+    position:relative;
+}
+
 .context-submenu>.context-menu {
     top:0;
     left:100%;
