@@ -40,21 +40,22 @@
         y (- (.-bottom bcr) js/window.innerHeight)
         [new-left new-top] (map - [left top] [(if (pos? x) x 0)
                                               (if (pos? y) y 0)])]
-    (swap! offsets-a assoc :left new-left :top new-top)))
+    (swap! offsets-a assoc :margin-left new-left :margin-top new-top)))
 
 
 (defn- inner-submenu [actions-coll s-menus-a hide-context!]
   (let [dom-node (atom nil)
-        offsets (r/atom {:top 0 :left 0})]
+        offsets (r/atom {:margin-top 0 :margin-left 0})]
     (r/create-class
      {:component-did-mount #(reposition! offsets @dom-node)
       :reagent-render
       (fn []
-        (let [{:keys [top left]} @offsets]
-          [:ul.dropdown-menu.context-menu
-           {:style {:display :block
-                    :margin-top top
-                    :margin-left left}          
+        (let [{:keys [margin-top margin-left]} @offsets]
+          [:ul.dropdown-menu.context-menu           
+           {:class (when (not= 0 margin-left) "open-left")
+            :style {:display :block
+                    :margin-top margin-top
+                    :margin-left margin-left}
             :ref (fn [this] (reset! dom-node this))}
            (actions-to-components actions-coll s-menus-a hide-context!)]))})))
 
@@ -111,12 +112,14 @@
 (defn- inner-context-menu
   [menu-atom hide-context!]
   (let [dom-node (atom nil)
-        showing-submenus-atom (r/atom {})]
+        showing-submenus-atom (r/atom {})
+        offsets (r/atom {:margin-top 0 :margin-left 0})]
     (r/create-class
-     {:component-did-mount #(reposition! menu-atom @dom-node)
+     {:component-did-mount #(reposition! offsets @dom-node)
       :reagent-render
       (fn []
         (let [{:keys [display actions left top]} @menu-atom
+              {:keys [margin-top margin-left]} @offsets
               esc-handler! (fn [evt]
                              (when (= (.-keyCode evt) 27) ;; `esc' key
                                (.stopPropagation evt)
@@ -127,7 +130,10 @@
           [:div.context-menu-container
            {:style {:position :fixed
                     :left left
-                    :top top}}
+                    :top top
+                    :margin-left margin-left
+                    :margin-top margin-top}
+            :class (when (not= 0 margin-left) "open-left")}
            [:ul.dropdown-menu.context-menu
             {:ref (fn [this]
                     (reset! dom-node this)
@@ -139,9 +145,8 @@
              :on-wheel scroll!
              :style {:display (or display "none")
                      :position :relative}}
-            (when display
-              (when actions
-                (actions-to-components actions showing-submenus-atom hide-context!)))]]))})))
+            (when actions
+              (actions-to-components actions showing-submenus-atom hide-context!))]]))})))
 
 
 ;; main component for the user

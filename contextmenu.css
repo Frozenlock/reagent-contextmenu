@@ -2,13 +2,11 @@
 
 .context-menu-backdrop {
     background: rgba(0,0,0,0);
+    z-index: 200;
 }
 
-.context-menu-container {
-    transition: top .2s linear, left .2s linear;
-}
 
-.dropdown-menu.context-menu {
+.context-menu-container, .dropdown-menu.context-menu {
     transition: margin-top .2s linear, margin-left .2s linear;
 }
 
@@ -63,6 +61,13 @@
     margin-left:-1px;
     border-radius:0 6px 6px 6px;
 }
+
+.open-left .context-submenu>.context-menu {
+    left: auto;
+    right: 100%;
+    border-radius:6px 0 6px 6px;
+}
+
 .context-submenu:hover>.context-menu {
     display:block;
 }
@@ -79,6 +84,15 @@
     margin-top:5px;
     margin-right:-10px;
 }
+
+.open-left .context-submenu>a:after {
+    float:left;
+    border-color:transparent;
+    border-width:5px 5px 5px 0;
+    border-right-color:#cccccc;
+    margin-right:10px;
+}
+
 .context-submenu:hover>a:after {
     border-left-color:#ffffff;
 }
@@ -90,5 +104,3 @@
     margin-left:10px;
     border-radius:6px 0 6px 6px;
 }
-
-
