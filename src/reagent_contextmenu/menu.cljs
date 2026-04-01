@@ -154,9 +154,22 @@
      [:div
       (when display
         [:div.context-menu-backdrop
-         {;; :on-context-menu (fn [e]
-          ;;                    (hide-context!)
-          ;;                    (.preventDefault e))
+         {:on-context-menu (fn [e]
+                             (.preventDefault e)
+                             (hide-context!)
+                             ;; Re-dispatch to the element under the cursor so a new
+                             ;; context menu can open at the right-click position.
+                             (let [x (.-clientX e)
+                                   y (.-clientY e)]
+                               ;; Use rAF so the backdrop is removed from the DOM first
+                               (js/requestAnimationFrame
+                                (fn []
+                                  (when-let [el (.elementFromPoint js/document x y)]
+                                    (.dispatchEvent
+                                     el (js/MouseEvent. "contextmenu"
+                                                        #js {:bubbles true
+                                                             :clientX x
+                                                             :clientY y})))))))
           :on-mouse-down #(.preventDefault %) ;; prevent clearing text selection
           :on-click hide-context!
           :style {:position :fixed
