@@ -1,4 +1,4 @@
-(defproject org.clojars.frozenlock/reagent-contextmenu "0.4.3"
+(defproject org.clojars.frozenlock/reagent-contextmenu "0.4.4"
   :description "Context menu for Reagent!"
   :url "https://github.com/Frozenlock/reagent-contextmenu"
 

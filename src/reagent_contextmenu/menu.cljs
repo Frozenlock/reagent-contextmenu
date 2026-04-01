@@ -7,13 +7,10 @@
 ;;; Make sure to create the context-menu element somewhere in the dom.
 ;;; Recommended: at the start of the document.
 
-
-
 (defonce default-menu-atom (r/atom {:actions [["Action" #(prn "hello")]]
                                     :left 0
                                     :top 0
                                     :display nil}))
-
 
 (defn- show-context! [menu-atom actions x y]
   (swap! menu-atom assoc
@@ -24,7 +21,6 @@
 
 (defn- hide-context! [menu-atom]
   (swap! menu-atom assoc :display nil))
-
 
 ;;;; container to be included into the document
 
@@ -42,7 +38,6 @@
                                               (if (pos? y) y 0)])]
     (swap! offsets-a assoc :margin-left new-left :margin-top new-top)))
 
-
 (defn- inner-submenu [actions-coll s-menus-a hide-context!]
   (let [dom-node (atom nil)
         offsets (r/atom {:margin-top 0 :margin-left 0})]
@@ -51,7 +46,7 @@
       :reagent-render
       (fn []
         (let [{:keys [margin-top margin-left]} @offsets]
-          [:ul.dropdown-menu.context-menu           
+          [:ul.dropdown-menu.context-menu
            {:class (when (not= 0 margin-left) "open-left")
             :style {:display :block
                     :margin-top margin-top
@@ -78,7 +73,7 @@
 
 (defn- action-component [name action-fn hide-context!]
   [:a {:on-click #(do (.stopPropagation %)
-                      (hide-context!) 
+                      (hide-context!)
                       (action-fn %))
        :style {:cursor :pointer}} name])
 
@@ -93,21 +88,19 @@
                       :on-mouse-enter clear-sub-menus!}
                  [:a name]])))
 
-
 (defn- actions-to-components [actions-coll showing-submenus-atom hide-context!]
   (for [[id item] (map-indexed vector actions-coll)]
     (let [clear-sub-menus! #(reset! showing-submenus-atom nil)]
-      (cond 
+      (cond
         (coll? item) ^{:key id} [action-or-submenu [id item] showing-submenus-atom hide-context!]
         (keyword? item)
-        ^{:key id}[:li.divider {:on-mouse-enter clear-sub-menus!}]
-        
-        :else 
-        ^{:key id}[:li.dropdown-header 
-                   {:style {:cursor :default}
-                    :on-mouse-enter clear-sub-menus!}
-                   item]))))
+        ^{:key id} [:li.divider {:on-mouse-enter clear-sub-menus!}]
 
+        :else
+        ^{:key id} [:li.dropdown-header
+                    {:style {:cursor :default}
+                     :on-mouse-enter clear-sub-menus!}
+                    item]))))
 
 (defn- inner-context-menu
   [menu-atom hide-context!]
@@ -148,24 +141,23 @@
             (when actions
               (actions-to-components actions showing-submenus-atom hide-context!))]]))})))
 
-
 ;; main component for the user
-
 
 (defn context-menu
   "The context menu component. Will use a default (and global) state
   ratom if none is provided."
   ([] (context-menu default-menu-atom))
   ([menu-atom]
-   ;; remove the context menu if we click out of it or press `esc' (like the normal context menu)  
+   ;; remove the context menu if we click out of it or press `esc' (like the normal context menu)
    (let [hide-context! #(hide-context! menu-atom)
          display (get @menu-atom :display)]
      [:div
       (when display
         [:div.context-menu-backdrop
-         {:on-context-menu (fn [e]
-                             (hide-context!)
-                             (.preventDefault e))
+         {;; :on-context-menu (fn [e]
+          ;;                    (hide-context!)
+          ;;                    (.preventDefault e))
+          :on-mouse-down #(.preventDefault %) ;; prevent clearing text selection
           :on-click hide-context!
           :style {:position :fixed
                   :top 0
@@ -174,8 +166,6 @@
                   :height "100vh"}}
          [inner-context-menu menu-atom hide-context!]])])))
 
-
-
 ;;;;; Main function below
 
 ;; Use with a :on-context-menu to activate on right-click
@@ -183,7 +173,7 @@
 (defn context!
   "Update the context menu with a collection of [name function] pairs.
   When function is nil, consider the button as 'disabled' and do not
-  allow any click.  
+  allow any click.
 
   When passed a keyword instead of [name function], a divider is
   inserted.
@@ -196,7 +186,7 @@
    [my-other-fn #(prn (str 1 2 3))]]"
   ([evt name-fn-coll] (context! evt default-menu-atom name-fn-coll))
   ([evt menu-atom name-fn-coll]
-   (show-context! menu-atom name-fn-coll 
+   (show-context! menu-atom name-fn-coll
                   (.-clientX evt)
                   (.-clientY evt))
    (.preventDefault evt)))
